@@ -13,7 +13,7 @@ export default function LegendRow({
 }) {
     const { keybinds, actionToKey, editingKey, setEditingKey, conflict, remapKey } = keybindState
     const layer = LAYERS[activeLayer]
-    const [min, max] = getLayerDomain(layerData)
+    const [min, max] = layer.domain || getLayerDomain(layerData)
     const nationalAvg = getNationalAvg(layerData, timeIndex)
 
     const rampRef = useRef(null)

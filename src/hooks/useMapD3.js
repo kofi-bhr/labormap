@@ -73,8 +73,9 @@ export function useMapD3({
             .attr('class', 'state')
             .attr('d', path)
             .attr('fill', 'var(--map-base)')
-            .attr('stroke', 'var(--state-border)')
+            .attr('stroke', '#FFFFFF')
             .attr('stroke-width', 0.5)
+            .attr('vector-effect', 'non-scaling-stroke')
             .style('cursor', 'pointer')
             .on('mouseover', function (event, d) {
                 onHover(d.id)
@@ -118,7 +119,7 @@ export function useMapD3({
         if (!svgRef.current || !layerData) return
 
         const layer = LAYERS[activeLayer]
-        const [min, max] = getLayerDomain(layerData)
+        const [min, max] = layer.domain || getLayerDomain(layerData)
         const colorScale = d3.scaleSequential()
             .domain([min, max])
             .interpolator(layer.interpolator)
@@ -143,7 +144,7 @@ export function useMapD3({
         svgRef.current.selectAll('.state')
             .attr('stroke', d => {
                 if (d.id === hoveredState || d.id === selectedState) return 'var(--text-primary)'
-                return 'var(--state-border)'
+                return '#FFFFFF'
             })
             .attr('stroke-width', d => {
                 if (d.id === hoveredState || d.id === selectedState) return 1.5

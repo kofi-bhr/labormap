@@ -70,7 +70,11 @@ export const LAYERS = {
         frequency: 'monthly',
         unit: '%',
         source: 'BLS LAUS · API v2',
-        interpolator: makeInterpolator('#00FFAA'),
+        domain: [1, 20],
+        interpolator: d3.scaleLinear()
+            .domain([0, 9 / 19, 1])
+            .range(['#00FFAA', '#FFCC00', '#FF0055'])
+            .clamp(true),
         dataFile: 'unemployment.json'
     },
     participation: {

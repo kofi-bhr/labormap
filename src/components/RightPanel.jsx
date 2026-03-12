@@ -12,7 +12,7 @@ import {
  */
 export default function RightPanel({
     activeLayer, layerData, timeIndex, hoveredState, selectedState,
-    allData, sectorData, activeSector
+    allData, sectorData, activeSector, dispatch
 }) {
     const activeFips = selectedState || hoveredState
     const stateInfo = activeFips ? STATE_FIPS[activeFips] : null

@@ -41,7 +41,7 @@ export function useKeybinds(dispatch) {
             // Guard: ignore when typing in input
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
 
-            const key = e.key === ' ' ? ' ' : e.key
+            const key = e.key === ' ' ? ' ' : (e.key.length === 1 ? e.key.toUpperCase() : e.key)
             const action = keybinds[key]
             if (!action) return
 
