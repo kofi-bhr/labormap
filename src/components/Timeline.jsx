@@ -40,7 +40,7 @@ export default function Timeline({
                 onClick={togglePlay}
                 style={{
                     width: 32, height: 32, minWidth: 32,
-                    background: '#111111',
+                    background: 'var(--bg)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     marginRight: 1
                 }}
@@ -48,12 +48,12 @@ export default function Timeline({
             >
                 {isPlaying ? (
                     <svg width="10" height="12" viewBox="0 0 10 12" fill="none">
-                        <rect x="0" y="0" width="3" height="12" fill="#FFFFFF" />
-                        <rect x="7" y="0" width="3" height="12" fill="#FFFFFF" />
+                        <rect x="0" y="0" width="3" height="12" fill="var(--text-primary)" />
+                        <rect x="7" y="0" width="3" height="12" fill="var(--text-primary)" />
                     </svg>
                 ) : (
-                    <svg width="10" height="12" viewBox="0 0 10 12" fill="none">
-                        <polygon points="0,0 10,6 0,12" fill="#FFFFFF" />
+                    <svg width="10" height="12" viewBox="0 0 10 12" fill="none" style={{ transform: 'translateX(1px)' }}>
+                        <polygon points="0,0 10,6 0,12" fill="var(--text-primary)" />
                     </svg>
                 )}
             </button>
@@ -85,7 +85,7 @@ export default function Timeline({
                 style={{
                     width: 80, minWidth: 80,
                     textAlign: 'center',
-                    color: '#111111',
+                    color: 'var(--text-primary)',
                     padding: '0 8px'
                 }}
             >
@@ -102,7 +102,7 @@ export default function Timeline({
                 className="t-10"
                 style={{
                     padding: '0 10px',
-                    color: '#111111',
+                    color: 'var(--text-primary)',
                     minWidth: 32
                 }}
             >

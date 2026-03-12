@@ -2,11 +2,14 @@
 /* Geist Mono loaded via index.html Google Fonts link */
 
 /* ── Reset ── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  border-radius: 0 !important; /* PRD §2.3 — zero rounded corners, global */
+  border-radius: 0 !important;
+  /* PRD §2.3 — zero rounded corners, global */
 }
 
 :root {
@@ -34,7 +37,9 @@
   --font: 'Geist Mono', monospace;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   width: 100%;
   overflow: hidden;
@@ -47,10 +52,25 @@ html, body, #root {
 }
 
 /* ── Typography scale ── */
-.t-10 { font-size: 10px; letter-spacing: 0.08em; }
-.t-11 { font-size: 11px; letter-spacing: 0.06em; }
-.t-13 { font-size: 13px; letter-spacing: 0.04em; }
-.t-15 { font-size: 15px; letter-spacing: 0.02em; }
+.t-10 {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.t-11 {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.t-13 {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.t-15 {
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
 
 /* ── Fade-up mount animation ── PRD §2.4 */
 @keyframes fadeUp {
@@ -58,6 +78,7 @@ html, body, #root {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -69,17 +90,34 @@ html, body, #root {
 }
 
 /* Stagger delays */
-.fade-delay-0 { animation-delay: 0ms; }
-.fade-delay-1 { animation-delay: 80ms; }
-.fade-delay-2 { animation-delay: 160ms; }
-.fade-delay-3 { animation-delay: 240ms; }
-.fade-delay-4 { animation-delay: 320ms; }
+.fade-delay-0 {
+  animation-delay: 0ms;
+}
+
+.fade-delay-1 {
+  animation-delay: 80ms;
+}
+
+.fade-delay-2 {
+  animation-delay: 160ms;
+}
+
+.fade-delay-3 {
+  animation-delay: 240ms;
+}
+
+.fade-delay-4 {
+  animation-delay: 320ms;
+}
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar { display: none; }
+::-webkit-scrollbar {
+  display: none;
+}
 
 /* ── Input / button reset ── */
-button, input {
+button,
+input {
   font-family: var(--font);
   font-weight: 400;
   border: none;

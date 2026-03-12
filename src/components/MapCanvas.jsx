@@ -7,13 +7,13 @@ import { useMapD3 } from '../hooks/useMapD3.js'
  */
 export default function MapCanvas({
     topoData, activeLayer, layerData, timeIndex,
-    hoveredState, selectedState, onHover, onSelect, onMouseMove
+    hoveredState, selectedState, onHover, onSelect, onMouseMove, showElection
 }) {
     const containerRef = useRef(null)
 
     const { colorScaleRef } = useMapD3({
         containerRef, topoData, activeLayer, layerData, timeIndex,
-        hoveredState, selectedState, onHover, onSelect, onMouseMove
+        hoveredState, selectedState, onHover, onSelect, onMouseMove, showElection
     })
 
     return (

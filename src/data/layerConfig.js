@@ -57,9 +57,9 @@ export const STATE_FIPS = {
 
 export const FIPS_CODES = Object.keys(STATE_FIPS)
 
-/* Color interpolators — PRD §2.2 */
+/* Color interpolators — Vibrant Spy HUD */
 function makeInterpolator(hue) {
-    return t => d3.interpolateRgb('#F5F5F5', hue)(t)
+    return t => d3.interpolateRgb('#0A0A1A', hue)(t)
 }
 
 export const LAYERS = {
@@ -70,7 +70,7 @@ export const LAYERS = {
         frequency: 'monthly',
         unit: '%',
         source: 'BLS LAUS · API v2',
-        interpolator: t => d3.interpolateRgb('#F5F5F5', '#111111')(t),
+        interpolator: makeInterpolator('#00FFAA'),
         dataFile: 'unemployment.json'
     },
     participation: {
@@ -80,7 +80,7 @@ export const LAYERS = {
         frequency: 'monthly',
         unit: '%',
         source: 'BLS LAUS · API v2',
-        interpolator: makeInterpolator('#005F73'),
+        interpolator: makeInterpolator('#0088FF'),
         dataFile: 'participation.json'
     },
     wage: {
@@ -90,7 +90,7 @@ export const LAYERS = {
         frequency: 'annual',
         unit: '$',
         source: 'CENSUS ACS 1-YR',
-        interpolator: makeInterpolator('#9B2226'),
+        interpolator: makeInterpolator('#FF0055'),
         dataFile: 'wage.json'
     },
     education: {
@@ -100,8 +100,18 @@ export const LAYERS = {
         frequency: 'annual',
         unit: '%',
         source: 'CENSUS ACS 1-YR',
-        interpolator: makeInterpolator('#0A3161'),
+        interpolator: makeInterpolator('#FFCC00'),
         dataFile: 'education.json'
+    },
+    population: {
+        id: 'population',
+        label: "Total Population",
+        defaultKey: 'O',
+        frequency: 'annual',
+        unit: 'K',
+        source: 'CENSUS ACS 1-YR',
+        interpolator: makeInterpolator('#AA00FF'),
+        dataFile: 'population.json'
     },
     sector: {
         id: 'sector',
@@ -110,12 +120,12 @@ export const LAYERS = {
         frequency: 'monthly',
         unit: 'K',
         source: 'BLS CES · API v2',
-        interpolator: t => d3.interpolateRgb('#F5F5F5', '#111111')(t),
+        interpolator: makeInterpolator('#00FFAA'),
         dataFile: 'unemployment.json' // sector mode uses unemployment as base fill
     }
 }
 
-export const LAYER_IDS = ['unemployment', 'participation', 'wage', 'education', 'sector']
+export const LAYER_IDS = ['unemployment', 'participation', 'wage', 'education', 'population', 'sector']
 
 export const SECTORS = [
     { id: 'leisure', label: 'Leisure & Hosp.', series: 'CES7000000001' },
@@ -136,6 +146,7 @@ export const DEFAULT_KEYBINDS = {
     P: 'participation',
     W: 'wage',
     E: 'education',
+    O: 'population',
     S: 'sector',
     ' ': 'play',
     ArrowLeft: 'stepBack',

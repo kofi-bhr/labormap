@@ -56,16 +56,16 @@ export default function LegendRow({
             {/* §10.1 Color scale legend */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <div>
-                    <div className="t-10" style={{ color: '#888888', marginBottom: 1 }}>{layer.label}</div>
+                    <div className="t-10" style={{ color: 'var(--text-secondary)', marginBottom: 1 }}>{layer.label}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4, position: 'relative' }}>
-                        <span className="t-10" style={{ color: '#888888' }}>{formatValue(min, layer.unit)}</span>
+                        <span className="t-10" style={{ color: 'var(--text-secondary)' }}>{formatValue(min, layer.unit)}</span>
                         <canvas
                             ref={rampRef}
                             width={200}
                             height={8}
                             style={{ display: 'block', width: 200, height: 8 }}
                         />
-                        <span className="t-10" style={{ color: '#888888' }}>{formatValue(max, layer.unit)}</span>
+                        <span className="t-10" style={{ color: 'var(--text-secondary)' }}>{formatValue(max, layer.unit)}</span>
                         {/* National avg tick */}
                         {nationalAvg != null && max > min && (
                             <div style={{
@@ -76,8 +76,8 @@ export default function LegendRow({
                                 flexDirection: 'column',
                                 alignItems: 'center'
                             }}>
-                                <div style={{ width: 1, height: 4, background: '#111111' }} />
-                                <span style={{ fontSize: 8, color: '#888888', fontFamily: 'var(--font)' }}>avg</span>
+                                <div style={{ width: 1, height: 4, background: 'var(--text-primary)' }} />
+                                <span style={{ fontSize: 8, color: 'var(--text-secondary)', fontFamily: 'var(--font)' }}>avg</span>
                             </div>
                         )}
                     </div>
@@ -99,7 +99,7 @@ export default function LegendRow({
                                     maxLength={1}
                                     style={{
                                         width: 16, height: 16, textAlign: 'center',
-                                        border: '1px solid #111111', fontSize: 9,
+                                        border: '1px solid var(--text-primary)', fontSize: 9,
                                         fontFamily: 'var(--font)', padding: 0
                                     }}
                                     onKeyDown={(e) => {

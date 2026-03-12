@@ -32,7 +32,7 @@ export default function RightPanel({
                                 {formatValue(value, layer.unit)}
                             </span>
                             {delta != null && (
-                                <span className="t-11" style={{ color: '#888888' }}>
+                                <span className="t-11" style={{ color: 'var(--text-secondary)' }}>
                                     {delta > 0 ? '↑' : delta < 0 ? '↓' : '→'}{' '}
                                     {Math.abs(delta).toFixed(1)}{layer.unit === '$' ? '' : 'pp'}
                                 </span>
@@ -40,7 +40,7 @@ export default function RightPanel({
                         </div>
                     </>
                 ) : (
-                    <div className="t-10" style={{ color: '#888888' }}>HOVER A STATE</div>
+                    <div className="t-10" style={{ color: 'var(--text-secondary)' }}>HOVER A STATE</div>
                 )}
             </div>
 
@@ -51,6 +51,7 @@ export default function RightPanel({
                     layerData={layerData}
                     timeIndex={timeIndex}
                     layer={layer}
+                    dispatch={dispatch}
                 />
             </div>
 
@@ -71,15 +72,15 @@ export default function RightPanel({
 
             {/* §9.4 Attribution */}
             <div className="rp-section" style={{ minHeight: 28, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span className="t-10" style={{ color: '#888888' }}>{layer.source}</span>
-                <span className="t-10" style={{ color: '#888888' }}>UPDATED JAN 2025</span>
+                <span className="t-10" style={{ color: 'var(--text-secondary)' }}>{layer.source}</span>
+                <span className="t-10" style={{ color: 'var(--text-secondary)' }}>UPDATED JAN 2025</span>
             </div>
         </div>
     )
 }
 
 /* ── Primary line chart (D3 in SVG) ── */
-function PrimaryChart({ fips, layerData, timeIndex, layer }) {
+function PrimaryChart({ fips, layerData, timeIndex, layer, dispatch }) {
     const svgRef = useRef(null)
 
     useEffect(() => {
@@ -93,70 +94,79 @@ function PrimaryChart({ fips, layerData, timeIndex, layer }) {
         const iw = w - margin.left - margin.right
         const ih = h - margin.top - margin.bottom
 
-        if (!fips || !layerData?.data?.[fips]) {
-            // Empty state
+        if (!layerData?.data) {
             svg.append('text')
                 .attr('x', w / 2).attr('y', h / 2)
                 .attr('text-anchor', 'middle')
-                .attr('fill', '#CCCCCC')
+                .attr('fill', 'var(--text-secondary)')
                 .attr('font-size', 10)
                 .attr('font-family', 'var(--font)')
-                .text('Select a state')
+                .text('Loading data...')
             return
         }
 
-        const series = getStateSeries(fips, layerData)
-        const validSeries = series.filter(d => d.y != null)
+        const firstFips = Object.keys(layerData.data)[0]
+        if (!firstFips) return
+        const baseSeries = getStateSeries(firstFips, layerData)
+
+        // Compute national series
+        const fipsList = Object.keys(layerData.data)
+        const nationalSeries = []
+        for (let i = 0; i < baseSeries.length; i++) {
+            let sum = 0, cnt = 0
+            for (const f of fipsList) {
+                const entries = layerData.data[f]
+                if (entries[i]?.value != null) { sum += entries[i].value; cnt++ }
+            }
+            if (cnt > 0) nationalSeries.push({ x: baseSeries[i].x, y: sum / cnt, index: i })
+            else nationalSeries.push({ x: baseSeries[i].x, y: null, index: i })
+        }
+
+        const stateSeriesRaw = fips ? getStateSeries(fips, layerData) : null
+        const stateSeries = stateSeriesRaw ? stateSeriesRaw.map((d, i) => ({ ...d, index: i })) : null
+
+        const activeSeries = stateSeries || nationalSeries
+        const validSeries = activeSeries.filter(d => d.y != null)
         if (!validSeries.length) return
 
-        const xDomain = d3.extent(series, d => d.x)
-        const yDomain = d3.extent(validSeries, d => d.y)
+        const xDomain = d3.extent(activeSeries, d => d.x)
+        const allYSeries = stateSeries ? stateSeries.concat(nationalSeries) : nationalSeries
+        const yDomain = d3.extent(allYSeries.filter(d => d.y != null), d => d.y)
+
         yDomain[0] = Math.max(0, yDomain[0] - (yDomain[1] - yDomain[0]) * 0.1)
         yDomain[1] = yDomain[1] + (yDomain[1] - yDomain[0]) * 0.1
 
         const xScale = d3.scaleLinear().domain(xDomain).range([margin.left, margin.left + iw])
         const yScale = d3.scaleLinear().domain(yDomain).range([margin.top + ih, margin.top])
 
-        // National avg reference line (dashed)
-        const nationalSeries = []
-        if (layerData?.data) {
-            const fipsList = Object.keys(layerData.data)
-            for (let i = 0; i < series.length; i++) {
-                let sum = 0, cnt = 0
-                for (const f of fipsList) {
-                    const entries = layerData.data[f]
-                    if (entries[i]?.value != null) { sum += entries[i].value; cnt++ }
-                }
-                if (cnt > 0) nationalSeries.push({ x: series[i].x, y: sum / cnt })
-            }
-        }
-
-        if (nationalSeries.length > 1) {
-            const natLine = d3.line().x(d => xScale(d.x)).y(d => yScale(d.y)).defined(d => d.y != null)
-            svg.append('path')
-                .datum(nationalSeries)
-                .attr('d', natLine)
-                .attr('fill', 'none')
-                .attr('stroke', '#CCCCCC')
-                .attr('stroke-width', 1)
-                .attr('stroke-dasharray', '3,3')
-        }
-
-        // State line
-        const line = d3.line().x(d => xScale(d.x)).y(d => yScale(d.y)).defined(d => d.y != null)
+        // Draw national series
+        const natLine = d3.line().x(d => xScale(d.x)).y(d => yScale(d.y)).defined(d => d.y != null)
         svg.append('path')
-            .datum(validSeries)
-            .attr('d', line)
+            .datum(nationalSeries.filter(d => d.y != null))
+            .attr('d', natLine)
             .attr('fill', 'none')
-            .attr('stroke', '#111111')
+            .attr('stroke', fips ? 'var(--text-secondary)' : 'var(--text-primary)')
             .attr('stroke-width', 1)
+            .attr('stroke-dasharray', fips ? '3,3' : null)
+
+        // Draw State line if selected
+        if (stateSeries) {
+            const line = d3.line().x(d => xScale(d.x)).y(d => yScale(d.y)).defined(d => d.y != null)
+            svg.append('path')
+                .datum(validSeries)
+                .attr('d', line)
+                .attr('fill', 'none')
+                .attr('stroke', 'var(--text-primary)')
+                .attr('stroke-width', 1)
+        }
 
         // Current time hairline
-        const currentX = xScale(series[Math.min(Math.floor(timeIndex), series.length - 1)]?.x ?? xDomain[0])
+        const currentTimePoint = activeSeries[Math.min(Math.floor(timeIndex), activeSeries.length - 1)]
+        const currentX = xScale(currentTimePoint?.x ?? xDomain[0])
         svg.append('line')
             .attr('x1', currentX).attr('x2', currentX)
             .attr('y1', margin.top).attr('y2', margin.top + ih)
-            .attr('stroke', '#888888').attr('stroke-width', 1)
+            .attr('stroke', 'var(--text-secondary)').attr('stroke-width', 1)
 
         // X-axis: year labels every 5 years
         const years = []
@@ -164,7 +174,7 @@ function PrimaryChart({ fips, layerData, timeIndex, layer }) {
         for (const y of years) {
             svg.append('text')
                 .attr('x', xScale(y)).attr('y', margin.top + ih + 14)
-                .attr('text-anchor', 'middle').attr('fill', '#888888')
+                .attr('text-anchor', 'middle').attr('fill', 'var(--text-secondary)')
                 .attr('font-size', 10).attr('font-family', 'var(--font)')
                 .text(y)
         }
@@ -174,12 +184,32 @@ function PrimaryChart({ fips, layerData, timeIndex, layer }) {
         for (const t of yTicks) {
             svg.append('text')
                 .attr('x', margin.left + iw + 4).attr('y', yScale(t) + 3)
-                .attr('text-anchor', 'start').attr('fill', '#888888')
+                .attr('text-anchor', 'start').attr('fill', 'var(--text-secondary)')
                 .attr('font-size', 10).attr('font-family', 'var(--font)')
                 .text(layer.unit === '$' ? `${(t / 1000).toFixed(0)}k` : t.toFixed(1))
         }
 
-    }, [fips, layerData, timeIndex, layer])
+        // Invisible rect for hover scrubbing
+        if (dispatch) {
+            svg.append('rect')
+                .attr('x', margin.left).attr('y', margin.top)
+                .attr('width', iw).attr('height', ih)
+                .attr('fill', 'transparent').style('cursor', 'col-resize')
+                .on('mousemove', function (event) {
+                    const [mouseX] = d3.pointer(event)
+                    const hoveredX = xScale.invert(mouseX)
+                    let closestIndex = 0, minDiff = Infinity
+                    for (let i = 0; i < activeSeries.length; i++) {
+                        const diff = Math.abs(activeSeries[i].x - hoveredX)
+                        if (diff < minDiff) {
+                            minDiff = diff; closestIndex = i
+                        }
+                    }
+                    dispatch({ type: 'SET_TIME', index: closestIndex })
+                })
+        }
+
+    }, [fips, layerData, timeIndex, layer, dispatch])
 
     return <svg ref={svgRef} width="100%" height="100%" style={{ display: 'block' }} />
 }
@@ -240,14 +270,14 @@ function CorrelationChart({ activeLayer, allData, timeIndex, activeFips }) {
                 .attr('y', yScale(p.y) - 1.5)
                 .attr('width', 3)
                 .attr('height', 3)
-                .attr('fill', p.fips === activeFips ? '#111111' : '#CCCCCC')
+                .attr('fill', p.fips === activeFips ? 'var(--text-primary)' : 'var(--state-border)')
         }
 
         // Labels
         svg.append('text').attr('x', w / 2).attr('y', h - 2).attr('text-anchor', 'middle')
-            .attr('fill', '#888888').attr('font-size', 9).attr('font-family', 'var(--font)').text(config.xLabel)
+            .attr('fill', 'var(--text-secondary)').attr('font-size', 9).attr('font-family', 'var(--font)').text(config.xLabel)
         svg.append('text').attr('x', 2).attr('y', 10)
-            .attr('fill', '#888888').attr('font-size', 9).attr('font-family', 'var(--font)').text(config.yLabel)
+            .attr('fill', 'var(--text-secondary)').attr('font-size', 9).attr('font-family', 'var(--font)').text(config.yLabel)
 
     }, [config, timeIndex, activeFips])
 
@@ -285,7 +315,7 @@ function EmploymentBarChart({ layerData, timeIndex, activeFips }) {
                 .attr('y', h - m.bottom - barH)
                 .attr('width', barW)
                 .attr('height', barH)
-                .attr('fill', s.fips === activeFips ? '#111111' : '#DDDDDD')
+                .attr('fill', s.fips === activeFips ? 'var(--text-primary)' : 'var(--state-border)')
         }
 
         // Y-axis: 2 ticks
@@ -294,13 +324,13 @@ function EmploymentBarChart({ layerData, timeIndex, activeFips }) {
         for (const t of ticks) {
             svg.append('text')
                 .attr('x', w - 2).attr('y', yScale(t) + 3)
-                .attr('text-anchor', 'end').attr('fill', '#888888')
+                .attr('text-anchor', 'end').attr('fill', 'var(--text-secondary)')
                 .attr('font-size', 9).attr('font-family', 'var(--font)')
                 .text(t.toFixed(1))
         }
 
         svg.append('text').attr('x', w / 2).attr('y', h - 2).attr('text-anchor', 'middle')
-            .attr('fill', '#888888').attr('font-size', 9).attr('font-family', 'var(--font)').text('States ranked')
+            .attr('fill', 'var(--text-secondary)').attr('font-size', 9).attr('font-family', 'var(--font)').text('States ranked')
 
     }, [layerData, timeIndex, activeFips])
 

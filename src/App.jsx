@@ -58,6 +58,7 @@ function reducer(state, action) {
 export default function App() {
     const [state, dispatch] = useReducer(reducer, initialState)
     const { activeLayer, activeSector, timeIndex, isPlaying, playSpeed, hoveredState, selectedState } = state
+    const [showElection, setShowElection] = useState(false)
 
     /* ── Load data ── */
     const [allData, setAllData] = useState({})
@@ -68,7 +69,7 @@ export default function App() {
         // Fetch topo
         fetch('/states-10m.json').then(r => r.json()).then(setTopoData)
         // Fetch all layer data
-        const layers = ['unemployment', 'participation', 'wage', 'education', 'age']
+        const layers = ['unemployment', 'participation', 'wage', 'education', 'population']
         for (const l of layers) {
             fetch(`/data/${l}.json`).then(r => r.json()).then(d => {
                 setAllData(prev => ({ ...prev, [l]: d }))
@@ -145,8 +146,22 @@ export default function App() {
         <div className="app-shell">
             {/* §3 Header */}
             <div className="header-bar fade-up fade-delay-0">
-                <span className="t-11" style={{ color: '#111111', letterSpacing: '0.1em' }}>LABOR ATLAS</span>
-                <span className="t-10" style={{ color: '#888888' }}>BLS · CENSUS · FRED</span>
+                <span className="t-11" style={{ color: 'var(--text-primary)', letterSpacing: '0.1em' }}>LABOR ATLAS</span>
+                <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                    <button
+                        onClick={() => setShowElection(!showElection)}
+                        className="t-10"
+                        style={{
+                            color: showElection ? 'var(--bg)' : 'var(--text-primary)',
+                            background: showElection ? 'var(--text-primary)' : 'transparent',
+                            border: '1px solid var(--text-primary)',
+                            padding: '2px 8px'
+                        }}
+                    >
+                        ELECTION 24 {showElection ? 'ON' : 'OFF'}
+                    </button>
+                    <span className="t-10" style={{ color: 'var(--text-secondary)' }}>BLS · CENSUS · FRED</span>
+                </div>
             </div>
 
             {/* Sector bar (conditional) — §12 */}
@@ -170,6 +185,7 @@ export default function App() {
                         onHover={onHover}
                         onSelect={onSelect}
                         onMouseMove={onMouseMove}
+                        showElection={showElection}
                     />
                     <Tooltip
                         hoveredState={hoveredState}
@@ -190,6 +206,7 @@ export default function App() {
                     allData={allData}
                     sectorData={sectorData}
                     activeSector={activeSector}
+                    dispatch={dispatch}
                 />
             </div>
 
@@ -216,7 +233,7 @@ export default function App() {
             {isAnnual && (
                 <div className="t-10" style={{
                     position: 'fixed', bottom: 2, left: 16,
-                    color: '#888888', zIndex: 50
+                    color: 'var(--text-secondary)', zIndex: 50
                 }}>
                     * 2020 ACS 1-Year not released (COVID-19 data collection disruption)
                 </div>
